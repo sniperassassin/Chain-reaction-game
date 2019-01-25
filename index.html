@@ -70,8 +70,13 @@
 				row=$("#rows").val();
 				col=$("#cols").val();
 				us=$("#numuser").val();
-				console.log(row+col+us);
-				makemap(row,col);
+				if(us>="2" && us<="5")
+				{
+					console.log(row+col+us);
+					makemap(row,col);
+				}
+				else
+					return;
 			});
 			$(document).on('click','.clicks',function(event){
 				var colr=arr[num];
