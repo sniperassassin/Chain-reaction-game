@@ -1,0 +1,221 @@
+<html>
+<head>
+	<title>Chain Reaction Game</title>
+	<style type="text/css">
+	body{
+		font-family: cursive;
+	}
+	td {
+		height:50px;
+		width:50px;
+		border:2px solid green;
+		text-align: center;
+		cursor:pointer;
+	}
+	</style>
+	<script type="text/javascript" src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+	<div>
+		<form onsubmit="return false;">
+			Enter number of rows</br>
+			<input type="number" placeholder="More than one rows" id="rows"/></br>
+			Enter number of cols</br>
+			<input type="number" placeholder="More than one cols" id="cols"/></br>
+			Enter number of users to play in between 2 and 5</br>
+			<input type="number" min="2" max="5" placeholder="2-5" id="numuser"/></br>
+			<input type="submit" value="submit" id="incredential"/>
+		</form>
+	</div>
+	<div id="meraTable">
+		
+	</div>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	<script type="text/javascript">
+		var num=0;
+		var row=10;
+		var col=10;
+		const arr=["rgb(0, 128, 0)","rgb(0, 0, 255)","rgb(255, 0, 0)","rgb(0, 255, 220)","rgb(255, 0, 224)"];
+		var us=2;
+		function findLimit(x,y){
+			if((x==row-1 && y==col-1) || (x==0 && y==0) || (x==0 && y==col-1) || (x==row-1 && y==0))
+				return 2;
+			if((x==0 && y>0 && y<col-1) || (x==row-1 && y>0 && y<col-1) || (y==0 && x>0 && x<row-1) || (y==col-1 && x>0 && x<row-1))
+				return 3;
+			if(x>=0 && x<row && y>=0 && y<col)
+				return 4;
+		}
+
+		function checkcord(x,y){
+			if(x>=0 && x<row && y>=0 && y<col)
+				return true;
+		}
+		
+		function makemap(r,c){
+			var ht="<table>";
+			for(var i=0;i<r;i++)
+			{
+				ht+="<tr>";
+				for(var j=0;j<c;j++)
+				{
+					ht+="<td id='index"+i+""+j+"' x-axis='"+i+"' y-axis='"+j+"' class='clicks'>0</td>";
+				}
+				ht+="</tr>";
+			}
+			
+			ht+="</table>";
+			$("#meraTable").html(ht);
+		}
+
+//--------------------------------------------------------Game code--------------------------------------------//
+
+			function gameplay(x,y,z){
+				var colr=arr[num];
+				//$(this).css("background-color",arr[num]);
+				var currentValue=z;
+				if($("#index"+x+""+y).css("background-color")!=colr)
+				{
+					if($("#index"+x+""+y).css("background-color")=="rgba(0, 0, 0, 0)" || $("#index"+x+""+y).css("background-color")=="rgb(255, 255, 255)")
+					{
+						//console.log($("#index"+x+""+y).css("background-color"));
+					}
+					else
+						{
+							//console.log($("#index"+x+""+y).css("background-color"));
+							return;
+						}
+				}
+				num++;
+				num=num%us;
+				$("td").css("border-color",arr[num]);
+
+				console.log("click index:"+x+" "+y);
+				if(findLimit(x,y)==currentValue+1)
+				{
+					$("#index"+x+""+y).html('0');
+					$("#index"+x+""+y).css("background-color","white");
+					var queue=[];
+					queue.push([x,y,currentValue]);
+					while(queue.length!=0)
+					{
+						var xa=queue[0][0];
+						var ya=queue[0][1];
+						var cu=queue[0][2];
+						console.log(xa+" "+ya+" "+cu);
+						queue.shift();
+						//$(this).html(0);
+						
+						if(checkcord(xa,ya+1))
+						{
+							var thirnext=parseInt($("#index"+xa+""+(ya+1)).html());
+							if(findLimit(xa,ya+1)==thirnext+1)
+							{
+								queue.push([xa,ya+1,thirnext])
+								$("#index"+xa+""+(ya+1)).html('0');
+								$("#index"+xa+""+(ya+1)).css("background-color","white");
+							}
+							else
+								{
+									$("#index"+xa+""+(ya+1)).html(thirnext+1);
+									$("#index"+xa+""+(ya+1)).css("background-color",colr);
+								}
+
+						}
+
+						if(checkcord(xa+1,ya))
+						{
+							var firnext=parseInt($("#index"+(xa+1)+""+ya).html());
+							if(findLimit(xa+1,ya)==firnext+1)
+							{
+								queue.push([xa+1,ya,firnext])
+								$("#index"+(xa+1)+""+ya).html('0');
+								$("#index"+(xa+1)+""+ya).css("background-color","white");
+							}
+							else
+								{
+									$("#index"+(xa+1)+""+ya).html(firnext+1);
+									$("#index"+(xa+1)+""+ya).css("background-color",colr);
+								}
+
+						}
+
+						if(checkcord(xa,ya-1))
+						{
+							var fornext=parseInt($("#index"+xa+""+(ya-1)).html());
+							if(findLimit(xa,ya-1)==fornext+1)
+							{
+								queue.push([xa,ya-1,fornext])
+								$("#index"+xa+""+(ya-1)).html('0');
+								$("#index"+xa+""+(ya-1)).css("background-color","white");
+							}
+							else
+								{
+									$("#index"+xa+""+(ya-1)).html(fornext+1);
+									$("#index"+xa+""+(ya-1)).css("background-color",colr);
+								}
+
+						}
+
+						if(checkcord(xa-1,ya))
+						{
+							var secnext=parseInt($("#index"+(xa-1)+""+ya).html());
+							if(findLimit(xa-1,ya)==secnext+1)
+							{
+								queue.push([xa-1,ya,secnext])
+								$("#index"+(xa-1)+""+ya).html('0');
+								$("#index"+(xa-1)+""+ya).css("background-color","white");
+							}
+							else
+								{
+									$("#index"+(xa-1)+""+ya).html(secnext+1);
+									$("#index"+(xa-1)+""+ya).css("background-color",colr);
+								}
+
+						}
+						
+					}
+				}
+				else
+					{
+						$("#index"+x+""+y).html(currentValue+1);
+						$("#index"+x+""+y).css("background-color",colr);
+					}
+				
+				//var myid=$(this).attr('id');
+				//console.log(myid);
+				//console.log($(this).attr('x-axis')+$(this).attr('y-axis'));
+			}
+
+//---------------------------------------------game dode ends here------------------------------------------------			
+
+		//$("#meraTable").html(ht);
+		$(document).ready(function(){
+			$("#incredential").on('click',function(event){
+				row=$("#rows").val();
+				col=$("#cols").val();
+				us=$("#numuser").val();
+				if(us>="2" && us<="5")
+				{
+					console.log(row+col+us);
+					makemap(row,col);
+				}
+				else
+					return;
+			});
+			$(document).on('click','.clicks',function(event){
+				var x=parseInt($(this).attr('x-axis'));
+				var y=parseInt($(this).attr('y-axis'));
+				var currentValue=parseInt($(this).html());
+				socket.emit('clientside',{'x':x,'y':y,'z':currentValue});
+			});
+		})
+			
+	</script>
+	<script>
+		var socket=io();
+		socket.on('serverside',function(data){
+			gameplay(data.x,data.y,data.z);
+		})
+	</script>
+</body>
+</html>
